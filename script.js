@@ -1,20 +1,33 @@
 const terminal = document.getElementById("terminalOutput");
 const revelationSection = document.getElementById("revelation");
 
-// Lista de mensagens simuladas
-const messages = [
-    "Estabelecendo conexão...",
-    "IP identificado...",
-    "Dispositivo móvel detectado...",
-    "Sistema operacional detectado...",
-    "Buscando vulnerabilidades...",
-    "Extraindo dados do navegador...",
-    "Acessando galeria de fotos...",
-    "Sincronizando contatos...",
-    "Upload concluído."
-];
+let realLocation = null;
 
-// Gerador de IP fake
+// =============================
+// BUSCAR LOCALIZAÇÃO REAL VIA IP
+// =============================
+async function fetchLocation() {
+    try {
+        const response = await fetch("https://ipapi.co/json/");
+        const data = await response.json();
+
+        realLocation = {
+            ip: data.ip,
+            city: data.city,
+            region: data.region,
+            country: data.country_name,
+            org: data.org
+        };
+
+    } catch (error) {
+        // fallback se API falhar
+        realLocation = null;
+    }
+}
+
+// =============================
+// GERADOR DE IP FAKE (backup)
+// =============================
 function generateFakeIP() {
     return `${rand()}.${rand()}.${rand()}.${rand()}`;
 }
@@ -23,7 +36,9 @@ function rand() {
     return Math.floor(Math.random() * 255);
 }
 
-// Efeito de digitação
+// =============================
+// EFEITO DE DIGITAÇÃO
+// =============================
 function typeLine(text, callback) {
     let line = document.createElement("p");
     terminal.appendChild(line);
@@ -34,47 +49,73 @@ function typeLine(text, callback) {
         i++;
         if (i >= text.length) {
             clearInterval(interval);
-            if (callback) setTimeout(callback, 500);
+            if (callback) setTimeout(callback, 600);
         }
-    }, 40);
+    }, 35);
 }
 
-// Sequência principal
-function startHackSimulation(index = 0) {
-    if (index < messages.length) {
-        let text = messages[index];
+// =============================
+// SEQUÊNCIA PRINCIPAL
+// =============================
+function startHackSimulation() {
 
-        // Inserir IP fake na mensagem certa
-        if (text.includes("IP identificado")) {
-            text += " " + generateFakeIP();
+    const detectedIP = realLocation?.ip || generateFakeIP();
+    const detectedCity = realLocation
+        ? `${realLocation.city}, ${realLocation.region} - ${realLocation.country}`
+        : "Localização não identificada";
+    const detectedISP = realLocation?.org || "Provedor desconhecido";
+
+    const messages = [
+        "Estabelecendo conexão...",
+        "Iniciando varredura...",
+        "Analisando IP público...",
+        `IP detectado: ${detectedIP}`,
+        "Rastreando localização aproximada...",
+        `Localização: ${detectedCity}`,
+        `Provedor identificado: ${detectedISP}`,
+        "Detectando sistema operacional...",
+        `Navegador detectado: ${navigator.userAgent}`,
+        "Buscando vulnerabilidades...",
+        "Extraindo dados do navegador...",
+        "Sincronizando contatos...",
+        "Upload concluído."
+    ];
+
+    function next(index = 0) {
+        if (index < messages.length) {
+            typeLine(messages[index], () => next(index + 1));
+        } else {
+            setTimeout(showRevelation, 1800);
         }
-
-        typeLine(text, () => startHackSimulation(index + 1));
-    } else {
-        setTimeout(showRevelation, 1500);
     }
+
+    next();
 }
 
-// Mostrar revelação
+// =============================
+// REVELAÇÃO
+// =============================
 function showRevelation() {
 
-    // Vibrar celular se possível
+    // Vibrar celular
     if (navigator.vibrate) {
         navigator.vibrate([300, 100, 300]);
     }
 
-    // Flash de tela
-    document.body.style.backgroundColor = "red";
-    setTimeout(() => {
-        document.body.style.backgroundColor = "black";
-    }, 200);
+    // Flash vermelho
+    document.body.style.backgroundColor = "#8b0000";
 
-    // Scroll suave
-    revelationSection.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+        document.body.style.backgroundColor = "#000";
+        revelationSection.scrollIntoView({ behavior: "smooth" });
+    }, 400);
 }
 
-// Iniciar ao carregar
-window.onload = () => {
+// =============================
+// INICIAR
+// =============================
+window.onload = async () => {
     terminal.innerHTML = "";
+    await fetchLocation();
     startHackSimulation();
 };
