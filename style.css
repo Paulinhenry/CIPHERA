@@ -1,4 +1,6 @@
-/* Reset */
+/* ========================= */
+/* RESET */
+/* ========================= */
 * {
     margin: 0;
     padding: 0;
@@ -10,14 +12,16 @@ body {
     background: radial-gradient(circle at center, #0a0f0d 0%, #000 70%);
     color: #00ff88;
     overflow-x: hidden;
+    position: relative;
 }
 
-/* Scanline effect */
+/* ========================= */
+/* SCANLINE EFFECT */
+/* ========================= */
 body::after {
     content: "";
     position: fixed;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: repeating-linear-gradient(
         0deg,
         rgba(0, 255, 120, 0.03),
@@ -26,18 +30,21 @@ body::after {
         transparent 3px
     );
     pointer-events: none;
-    z-index: 999;
+    z-index: 3;
 }
 
-/* Container */
-.container {
-    width: 100%;
+/* ========================= */
+/* PARTICLES */
+/* ========================= */
+#particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
 }
-
 /* ========================= */
 /* INTRO ELEGANTE */
 /* ========================= */
-
 #intro {
     height: 100vh;
     background: radial-gradient(circle at 30% 30%, #0f1f17, #050a07 60%, #000 100%);
@@ -47,11 +54,11 @@ body::after {
     text-align: center;
     padding: 20px;
     position: relative;
+    z-index: 2;
 }
 
 .intro-content {
     max-width: 650px;
-    z-index: 2;
 }
 
 .intro-content h1 {
@@ -89,16 +96,19 @@ body::after {
     box-shadow: 0 20px 40px rgba(0, 255, 136, 0.5);
 }
 
+/* ========================= */
 /* TERMINAL */
+/* ========================= */
 #terminal {
     font-family: 'Courier New', monospace;
     height: 100vh;
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
     background: linear-gradient(180deg, #000000 0%, #050a07 100%);
+    position: relative;
+    z-index: 2;
 }
 
 .glitch {
@@ -133,22 +143,25 @@ body::after {
 }
 
 @keyframes blink {
-    0% { opacity: 1; }
+    0%,100% { opacity: 1; }
     50% { opacity: 0; }
-    100% { opacity: 1; }
 }
 
+/* ========================= */
 /* REVELAÇÃO */
+/* ========================= */
 #revelation {
+    display: none;
     min-height: 100vh;
     background: linear-gradient(180deg, #050505 0%, #111 100%);
     color: #ffffff;
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 40px;
     text-align: center;
+    z-index: 2;
+    position: relative;
 }
 
 #revelation h2 {
@@ -168,11 +181,16 @@ body::after {
     opacity: 0.8;
 }
 
+/* ========================= */
 /* LESSON */
+/* ========================= */
 #lesson {
+    display: none;
     background: #f5f7fa;
     padding: 100px 20px;
     color: #222;
+    position: relative;
+    z-index: 2;
 }
 
 #lesson h2 {
@@ -214,8 +232,48 @@ body::after {
     font-weight: bold;
 }
 
-/* Responsivo */
+/* ========================= */
+/* ANIMAÇÕES */
+/* ========================= */
+
+/* Fade-in suave */
+.fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 1s ease forwards;
+}
+
+.fade-up.delay-1 { animation-delay: 0.3s; }
+.fade-up.delay-2 { animation-delay: 0.6s; }
+.fade-up.delay-3 { animation-delay: 0.9s; }
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade-out elegante */
+.fade-out {
+    animation: fadeOut 0.8s ease forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* ========================= */
+/* RESPONSIVO */
+/* ========================= */
 @media (max-width: 768px) {
+
+    .intro-content h1 {
+        font-size: 2rem;
+    }
 
     .glitch {
         font-size: 2rem;
@@ -229,41 +287,25 @@ body::after {
     .terminal-text {
         font-size: 0.95rem;
     }
-
-}
-.start-button {
-    padding: 15px 40px;
-    font-size: 1rem;
-    background: transparent;
-    border: 2px solid #00ff88;
-    color: #00ff88;
-    cursor: pointer;
-    margin-bottom: 30px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
 }
 
-.start-button:hover {
-    background: #00ff88;
-    color: #000;
-    box-shadow: 0 0 20px #00ff88;
-}
-.tap-message {
-    opacity: 0.6;
-    animation: pulse 1.5s infinite;
-    cursor: pointer;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.3; }
-    50% { opacity: 0.8; }
-    100% { opacity: 0.3; }
-}
-/* Esconder revelação e lição inicialmente */
-#revelation,
-#lesson {
-    display: none;
-}
+/* ========================= */
+/* UTIL */
+/* ========================= */
 body.lock-scroll {
     overflow: hidden;
+}
+
+#intro,
+#terminal,
+#revelation,
+#lesson {
+    position: relative;
+    z-index: 2;
+}
+
+#intro,
+#terminal,
+#revelation {
+    background: transparent;
 }

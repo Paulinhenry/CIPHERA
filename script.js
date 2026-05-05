@@ -2,11 +2,14 @@ const intro = document.getElementById("intro");
 const terminalSection = document.getElementById("terminal");
 const terminal = document.getElementById("terminalOutput");
 const revelationSection = document.getElementById("revelation");
+const lessonSection = document.getElementById("lesson");
 const startBtn = document.getElementById("startExperience");
 
 let realLocation = null;
+let simulationStarted = false;
 
 document.body.classList.add("lock-scroll");
+
 
 // ==========================
 // Buscar localização via IP
@@ -28,6 +31,7 @@ async function fetchLocation() {
     }
 }
 
+
 // ==========================
 // Gerador IP Fake (backup)
 // ==========================
@@ -39,28 +43,37 @@ function rand() {
     return Math.floor(Math.random() * 255);
 }
 
-// ==========================
-// Efeito digitação
-// ==========================
-function typeLine(text, callback) {
-    const line = document.createElement("p");
-    terminal.appendChild(line);
 
-    let i = 0;
-    const interval = setInterval(() => {
-        line.textContent += text.charAt(i);
-        i++;
-        if (i >= text.length) {
-            clearInterval(interval);
-            if (callback) setTimeout(callback, 600);
+// ==========================
+// Efeito Digitação Realista
+// ==========================
+function typeLine(text) {
+    return new Promise(resolve => {
+
+        const line = document.createElement("p");
+        terminal.appendChild(line);
+
+        let i = 0;
+
+        function typing() {
+            if (i < text.length) {
+                line.textContent += text.charAt(i);
+                i++;
+                setTimeout(typing, 20 + Math.random() * 40);
+            } else {
+                setTimeout(resolve, 500);
+            }
         }
-    }, 35);
+
+        typing();
+    });
 }
 
+
 // ==========================
-// Simulação principal
+// Boot Sequence Cinemático
 // ==========================
-function startHackSimulation() {
+async function startHackSimulation() {
 
     const detectedIP = realLocation?.ip || generateFakeIP();
     const detectedCity = realLocation
@@ -69,66 +82,141 @@ function startHackSimulation() {
     const detectedISP = realLocation?.org || "Provedor desconhecido";
 
     const messages = [
-        "Estabelecendo conexão...",
-        "Iniciando varredura...",
+        "Inicializando sistema...",
+        "Carregando módulos de rede...",
+        "Verificando conexão externa...",
+        "Conexão estabelecida.",
         `IP detectado: ${detectedIP}`,
         "Rastreando localização aproximada...",
         `Localização: ${detectedCity}`,
         `Provedor identificado: ${detectedISP}`,
-        `Navegador detectado: ${navigator.userAgent}`,
+        "Analisando dispositivo...",
+        `Navegador: ${navigator.userAgent}`,
         "Buscando vulnerabilidades...",
-        "Extraindo dados...",
-        "Upload concluído."
+        "Extraindo metadados...",
+        "Transferência concluída."
     ];
 
-    function next(index = 0) {
-        if (index < messages.length) {
-            typeLine(messages[index], () => next(index + 1));
-        } else {
-            setTimeout(showRevelation, 2000);
-        }
+    for (let msg of messages) {
+        await typeLine(msg);
     }
 
-    next();
+    setTimeout(showRevelation, 1500);
 }
+
 
 // ==========================
 // Revelação
 // ==========================
 function showRevelation() {
-    document.getElementById("revelation").style.display = "flex";
-    document.getElementById("lesson").style.display = "block";
+
+    revelationSection.style.display = "flex";
+    lessonSection.style.display = "block";
 
     document.body.classList.remove("lock-scroll");
 
+    // Vibração (se suportado)
     if (navigator.vibrate) {
-        navigator.vibrate([300, 100, 300]);
+        navigator.vibrate([200, 80, 200]);
     }
 
-    document.body.style.backgroundColor = "#8b0000";
+    // Flash vermelho dramático
+    document.body.style.transition = "background 0.3s ease";
+    document.body.style.background = "#8b0000";
 
     setTimeout(() => {
-        document.body.style.backgroundColor = "#000";
+        document.body.style.background = "#000";
         revelationSection.scrollIntoView({ behavior: "smooth" });
     }, 400);
 }
 
+
 // ==========================
-// Botão inicia tudo
+// Botão Inicia Tudo
 // ==========================
 startBtn.addEventListener("click", async () => {
 
-    intro.style.transition = "opacity 0.6s ease";
-    intro.style.opacity = "0";
+    if (simulationStarted) return;
+    simulationStarted = true;
+
+    // Fade elegante
+    intro.classList.add("fade-out");
 
     setTimeout(async () => {
+
         intro.style.display = "none";
         terminalSection.style.display = "flex";
-
         terminal.innerHTML = "";
 
         await fetchLocation();
-        startHackSimulation();
+        await startHackSimulation();
 
-    }, 600);
+    }, 800);
 });
+
+
+// ==========================
+// Partículas Responsivas
+// ==========================
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+let particlesArray = [];
+
+class Particle {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2;
+        this.speedY = Math.random() * 0.6 + 0.2;
+        this.opacity = Math.random() * 0.5;
+    }
+
+    update() {
+        this.y += this.speedY;
+        if (this.y > canvas.height) {
+            this.reset();
+            this.y = 0;
+        }
+    }
+
+    draw() {
+        ctx.fillStyle = `rgba(0,255,136,${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function initParticles() {
+    particlesArray = [];
+    for (let i = 0; i < 90; i++) {
+        particlesArray.push(new Particle());
+    }
+}
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particlesArray.forEach(p => {
+        p.update();
+        p.draw();
+    });
+
+    requestAnimationFrame(animateParticles);
+}
+
+initParticles();
+animateParticles();
